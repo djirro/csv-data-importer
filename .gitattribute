@@ -1,0 +1,17 @@
+# Используем LF как стандарт.
+* text=auto
+
+# Указываем Git, что файлы с расширением .php и .js — это текстовые файлы.
+*.php text
+*.js text
+
+# Бинарные файлы, чтобы Git не пытался их изменять или сравнивать.
+*.png binary
+*.jpg binary
+*.gif binary
+
+# Для Node.js и других пакетов.
+/node_modules/* binary
+
+# Для Docker-файлов можно исключить их из обработки.
+*.dockerignore -text
