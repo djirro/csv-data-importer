@@ -1,15 +1,14 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <DragAndDrop />
 </template>
 
 <script>
-//import HelloWorld from './components/HelloWorld.vue'
+import DragAndDrop from './components/DragAndDrop.vue'
 
 export default {
   name: 'App',
   components: {
- //   HelloWorld
+    DragAndDrop
   }
 }
 </script>
