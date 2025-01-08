@@ -61,6 +61,46 @@
         // Далее - вызывать метод, который передаст файл на сервер.
       },
 
+      async uploadFile(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          // Отправляем файл на сервер
+          const response = await fetch("http://localhost:8080/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          // Проверяем успешность ответа
+          if (response.ok) {
+            const result = await response.json();
+            this.$emit("upload-success", result);  // передаем результат в родительский компонент
+          } else {
+            const error = await response.text();
+            this.$emit("upload-error", error);  // передаем ошибку в родительский компонент
+          }
+        } catch (err) {
+         this.$emit("upload-error", "Ошибка соединения с сервером");
+        }
+      },
+
+      validateFile(file) {
+      if (!file) {
+        this.showErrorMessage("Файл не выбран.");
+        return;
+      }
+      if (file.type !== "text/csv") {
+        this.showErrorMessage("Неверный формат файла. Выберите .csv файл.");
+        return;
+      }
+      this.errorMessage = "";
+      console.log("Файл принят:", file);
+
+      // Вызываем метод отправки файла
+      this.uploadFile(file);
+    },
+
       showErrorMessage(message) {
         this.errorMessage = message;
   
