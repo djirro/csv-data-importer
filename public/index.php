@@ -10,5 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit;
 }
 
+if ($_SERVER['REQUEST_URI'] === '/upload') {
+    require_once __DIR__ . '/../app/controllers/upload.php';
+}
+
 echo "Hello!"; 
 ?>
