@@ -57,8 +57,6 @@
         }
         this.errorMessage = "";
         console.log("Файл принят:", file);
-
-        // Далее - вызывать метод, который передаст файл на сервер.
       },
 
       async uploadFile(file) {
@@ -66,22 +64,23 @@
         formData.append("file", file);
 
         try {
-          // Отправляем файл на сервер
           const response = await fetch("http://localhost:8080/upload", {
             method: "POST",
             body: formData,
           });
 
-          // Проверяем успешность ответа
           if (response.ok) {
             const result = await response.json();
-            this.$emit("upload-success", result);  // передаем результат в родительский компонент
+            this.$emit("upload-success", result);
+            alert("Файл успешно загружен!");
           } else {
             const error = await response.text();
-            this.$emit("upload-error", error);  // передаем ошибку в родительский компонент
+            this.$emit("upload-error", error);
+            this.errorMessage = `Ошибка: ${error}`;
           }
         } catch (err) {
-         this.$emit("upload-error", "Ошибка соединения с сервером");
+          this.$emit("upload-error", "Ошибка соединения с сервером");
+          this.errorMessage = "Ошибка соединения с сервером."; 
         }
       },
 
@@ -97,14 +96,12 @@
       this.errorMessage = "";
       console.log("Файл принят:", file);
 
-      // Вызываем метод отправки файла
       this.uploadFile(file);
     },
 
       showErrorMessage(message) {
         this.errorMessage = message;
-  
-        // Убираем сообщение через 5 секунд.
+
         setTimeout(() => {
           this.errorMessage = "";
         }, 5000);
