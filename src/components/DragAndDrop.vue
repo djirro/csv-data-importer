@@ -6,16 +6,22 @@
     @dragleave="onDragLeave"
     @drop.prevent="onDrop"
   >
-    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-    <p>Перетащите файл сюда или выберите его</p>
-    <input
-      type="file"
-      accept=".csv"
-      @change="onFileSelect"
-      hidden
-      ref="fileInput"
-    />
-    <button @click="triggerFileSelect">Выбрать файл</button>
+    <div v-if="isLoading" class="spinner-container">
+      <span class="spinner">⏳</span> Загрузка данных...
+    </div>
+
+    <div v-else>
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+      <p>Перетащите файл сюда или выберите его</p>
+      <input
+        type="file"
+        accept=".csv"
+        @change="onFileSelect"
+        hidden
+        ref="fileInput"
+      />
+      <button @click="triggerFileSelect">Выбрать файл</button>
+    </div>
   </div>
 </template>
 
@@ -26,6 +32,7 @@ export default {
     return {
       isDragging: false,
       errorMessage: "",
+      isLoading: false,
     };
   },
   methods: {
@@ -70,6 +77,8 @@ export default {
       const formData = new FormData();
       formData.append("file", file);
 
+      this.isLoading = true;
+
       try {
         const response = await fetch("http://localhost:8080/upload", {
           method: "POST",
@@ -77,7 +86,9 @@ export default {
         });
 
         const result = await response.text();
-        console.log(result); 
+        console.log(result);
+
+        this.isLoading = false;
 
         if (response.ok) {
           this.$emit("upload-success", result);
@@ -87,6 +98,7 @@ export default {
           this.errorMessage = `Ошибка: ${result}`;
         }
       } catch (err) {
+        this.isLoading = false;
         this.$emit("upload-error", "Ошибка соединения с сервером");
         this.errorMessage = "Ошибка соединения с сервером.";
       }
@@ -140,5 +152,26 @@ button:hover {
   color: red;
   font-size: 14px;
   margin-bottom: 10px;
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  font-size: 30px;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
