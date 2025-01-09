@@ -5,11 +5,13 @@ composer.phar
 
 # Логи
 *.log
-*.sql
 
 # Кеши и временные файлы
 *.cache
 *.tmp
+
+# Файлы .csv
+*.csv
 
 # Файлы IDE
 /.idea/
