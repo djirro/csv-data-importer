@@ -1,0 +1,7 @@
+CREATE DATABASE IF NOT EXISTS test_db;
+USE test_db;
+
+CREATE TABLE IF NOT EXISTS catalog (
+    code VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
