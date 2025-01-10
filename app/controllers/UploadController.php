@@ -45,7 +45,7 @@ class UploadController
         }
     }
 
-    private function generateErrorReport($errors, $filePath)
+    public function generateErrorReport($errors, $filePath)
     {
         $errorFilePath = __DIR__ . '/../uploads/error_report.csv';
         $file = fopen($errorFilePath, 'w');

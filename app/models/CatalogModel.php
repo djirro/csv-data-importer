@@ -13,14 +13,24 @@ class CatalogModel
 
     public function insertOrUpdateRecord($code, $name)
     {
-        $query = "INSERT INTO catalog (code, name) VALUES (:code, :name)
+        $this->db->beginTransaction();
+
+        try {
+            $query = "INSERT INTO catalog (code, name) VALUES (:code, :name)
                   ON DUPLICATE KEY UPDATE name = :name";
 
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':code', $code);
-        $stmt->bindParam(':name', $name);
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':code', $code);
+            $stmt->bindParam(':name', $name);
 
-        return $stmt->execute();
+            $result = $stmt->execute();
+
+            $this->db->commit();
+            return $result;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            echo "Ошибка вставки записи: " . $e->getMessage();
+            return false;
+        }
     }
 }
-?>
