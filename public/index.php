@@ -10,9 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit;
 }
 
+// Подключаем контроллер для обработки загрузки файла.
 if ($_SERVER['REQUEST_URI'] === '/upload') {
-    require_once __DIR__ . '/../app/controllers/upload.php';
+    require_once __DIR__ . '/../app/controllers/UploadController.php';
+    $controller = new UploadController();
+    $controller->uploadFile();
+    exit;
 }
-
-echo "Hello!"; 
 ?>
