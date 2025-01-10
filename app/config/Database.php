@@ -8,6 +8,9 @@ class Database
     private $password = 'test_password';
     private $connection;
 
+    /**
+     * Создает подключение к базе данных.
+     */
     public function __construct()
     {
         try {
@@ -25,6 +28,9 @@ class Database
         }
     }
 
+    /**
+     * Возвращает объект подключения к базе данных.
+     */
     public function getConnection()
     {
         return $this->connection;

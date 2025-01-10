@@ -4,10 +4,17 @@ require_once __DIR__ . '/CatalogModel.php';
 
 class FileHelper
 {
+    /**
+     * Обрабатывает CSV файл: читает данные, валидирует и добавляет в базу.
+     * Генерирует отчет с ошибками для строк с недопустимыми данными.
+     * 
+     * @param string $filePath Путь к CSV файлу для обработки.
+     * @return array Массив с ошибками, содержащий код, название и описание ошибки.
+     */
     public function processCSV($filePath)
     {
-        $errors = [];
-        $transactionSuccessful = true;
+        $errorReport = [];
+        $validRows = [];
 
         if (($handle = fopen($filePath, "r")) !== false) {
             $lineNumber = 0;
@@ -15,11 +22,10 @@ class FileHelper
             while (($data = fgetcsv($handle, 1000, ",")) !== false) {
                 $lineNumber++;
 
-                if ($lineNumber == 1) continue; // Пропускаем заголовок
+                if ($lineNumber == 1) continue;
 
-                // Если данные некорректны, добавляем ошибку и продолжаем
                 if (count($data) < 2) {
-                    $errors[] = ['line' => $lineNumber, 'error' => 'Некорректное количество колонок'];
+                    $errorReport[] = [$data[0], $data[1], 'Некорректное количество колонок'];
                     continue;
                 }
 
@@ -27,15 +33,15 @@ class FileHelper
                 $code = trim($code);
                 $name = trim($name);
 
-                // Валидация и обработка
+                $error = '';
                 if (!$this->validateName($name)) {
-                    $errors[] = [$code, $name, 'Недопустимые символы в названии'];
-                    $transactionSuccessful = false; // Если есть ошибка, не обновляем базу
-                } else {
-                    $catalogModel = new CatalogModel();
-                    if (!$catalogModel->insertOrUpdateRecord($code, $name)) {
-                        $transactionSuccessful = false; // Ошибка при вставке
-                    }
+                    $error = 'Недопустимые символы в названии';
+                }
+
+                $errorReport[] = [$code, $name, $error];
+
+                if (empty($error)) {
+                    $validRows[] = [$code, $name];
                 }
             }
             fclose($handle);
@@ -43,15 +49,23 @@ class FileHelper
             error_log("Failed to open file: $filePath");
         }
 
-        // Если были ошибки валидации или вставки, не сохраняем изменения в базе
-        if (!$transactionSuccessful) {
-            $uploadController = new UploadController();
-            $uploadController->generateErrorReport($errors, $filePath);
+        $catalogModel = new CatalogModel();
+        foreach ($validRows as $row) {
+            list($code, $name) = $row;
+            if (!$catalogModel->insertOrUpdateRecord($code, $name)) {
+                error_log("Ошибка при добавлении записи с кодом $code и названием $name в базу данных.");
+            }
         }
 
-        return $errors;
+        return $errorReport;
     }
 
+    /**
+     * Проверяет, содержит ли название только допустимые символы.
+     * 
+     * @param string $name Название для проверки.
+     * @return bool true, если название допустимо, false — если нет.
+     */
     private function validateName($name)
     {
         return preg_match('/^[a-zA-Zа-яА-Я0-9 .-]+$/u', $name);

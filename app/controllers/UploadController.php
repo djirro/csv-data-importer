@@ -1,13 +1,15 @@
 <?php
 
-require_once __DIR__ . '/../models/CatalogModel.php';
 require_once __DIR__ . '/../models/FileHelper.php';
+require_once __DIR__ . '/../models/ReportGenerator.php';
 
 class UploadController
 {
+    /**
+     * Обрабатывает загрузку файла и создает отчет об ошибках.
+     */
     public function uploadFile()
     {
-        // Проверка на POST запрос и наличие файла
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             $fileTmpPath = $_FILES['file']['tmp_name'];
             $fileName = $_FILES['file']['name'];
@@ -20,17 +22,24 @@ class UploadController
             $destinationPath = $uploadDir . basename($fileName);
             if (move_uploaded_file($fileTmpPath, $destinationPath)) {
                 $fileHelper = new FileHelper();
-                $errors = $fileHelper->processCSV($destinationPath);
-                
-                if (!empty($errors)) {
-                    $this->generateErrorReport($errors, $destinationPath);
-                }
+                $errorReport = $fileHelper->processCSV($destinationPath);
 
-                echo json_encode([
-                    'status' => 'success',
-                    'message' => 'Файл успешно загружен',
-                    'filePath' => $destinationPath,
-                ]);
+                $reportGenerator = new ReportGenerator();
+                $reportFile = $reportGenerator->generateErrorReport($errorReport);
+
+                if (count(array_filter($errorReport, fn($error) => !empty($error[2]))) > 0) {
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Файл загружен с ошибками.',
+                        'filePath' => $reportFile,
+                    ]);
+                } else {
+                    echo json_encode([
+                        'status' => 'success',
+                        'message' => 'Файл успешно загружен и обработан.',
+                        'filePath' => $destinationPath,
+                    ]);
+                }
             } else {
                 echo json_encode([
                     'status' => 'error',
@@ -44,25 +53,4 @@ class UploadController
             ]);
         }
     }
-
-    public function generateErrorReport($errors, $filePath)
-    {
-        $errorFilePath = __DIR__ . '/../uploads/error_report.csv';
-        $file = fopen($errorFilePath, 'w');
-
-        fputcsv($file, ['Code', 'Name', 'Error']);
-
-        foreach ($errors as $error) {
-            fputcsv($file, $error);
-        }
-
-        fclose($file);
-
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Обработаны ошибки, отчет сохранен.',
-            'filePath' => $errorFilePath,
-        ]);
-    }
 }
-?>
