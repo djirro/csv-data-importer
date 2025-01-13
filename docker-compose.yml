@@ -1,0 +1,33 @@
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - php
+      
+  php:
+    image: php:8.1-fpm
+    volumes:
+      - ./public:/var/www/html
+      - ./app:/var/www/app
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/init/init_database.sql:/docker-entrypoint-initdb.d/init_database.sql
+
+volumes:
+  db_data:
