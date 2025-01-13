@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../config/config.php';
+
 class ReportGenerator
 {
     /**
@@ -14,7 +16,7 @@ class ReportGenerator
      */
     public function generateErrorReport($errorReport)
     {
-        $uploadDir = __DIR__ . '/../uploads/';
+        $uploadDir = UPLOAD_DIR;
         $reportFile = $uploadDir . 'error_report.csv';
 
         if (($handle = fopen($reportFile, 'w')) !== false) {

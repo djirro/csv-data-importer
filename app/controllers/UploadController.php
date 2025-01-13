@@ -2,10 +2,12 @@
 
 require_once __DIR__ . '/../models/FileHelper.php';
 require_once __DIR__ . '/../models/ReportGenerator.php';
+require_once __DIR__ . '/../helpers/ReportSender.php';
+require_once __DIR__ . '/../config/config.php';
 
 class UploadController
 {
-    /**
+    /*
      * Обрабатывает загрузку файла и создает отчет об ошибках.
      */
     public function uploadFile()
@@ -13,7 +15,8 @@ class UploadController
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             $fileTmpPath = $_FILES['file']['tmp_name'];
             $fileName = $_FILES['file']['name'];
-            $uploadDir = __DIR__ . '/../uploads/';
+            $uploadDir = UPLOAD_DIR;
+            $filePath = $uploadDir . 'error_report.csv';
 
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
@@ -28,11 +31,9 @@ class UploadController
                 $reportFile = $reportGenerator->generateErrorReport($errorReport);
 
                 if (count(array_filter($errorReport, fn($error) => !empty($error[2]))) > 0) {
-                    echo json_encode([
-                        'status' => 'error',
-                        'message' => 'Файл загружен с ошибками.',
-                        'filePath' => $reportFile,
-                    ]);
+                    $reportSender = new ReportSender();
+                    error_log("Отправка отчета через sendErrorReport: $filePath");
+                    $reportSender->sendErrorReport($filePath, $fileName);
                 } else {
                     echo json_encode([
                         'status' => 'success',
