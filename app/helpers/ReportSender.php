@@ -2,12 +2,7 @@
 
 class ReportSender
 {
-    /**
-     * Отправляет отчет с ошибками пользователю.
-     * 
-     * @param string $filePath Путь к файлу отчета
-     * @param string $originalFileName Имя оригинального загруженного файла
-     */
+    // Отправляет отчет с ошибками пользователю.
     public function sendErrorReport($filePath, $originalFileName)
     {
         error_log("sendErrorReport: Проверка существования файла: $filePath");

@@ -60,12 +60,7 @@ class FileHelper
         return $errorReport;
     }
 
-    /**
-     * Проверяет, содержит ли название только допустимые символы.
-     * 
-     * @param string $name Название для проверки.
-     * @return bool true, если название допустимо, false — если нет.
-     */
+    // Проверяет, содержит ли название только допустимые символы.
     private function validateName($name)
     {
         return preg_match('/^[a-zA-Zа-яА-Я0-9 .-]+$/u', $name);

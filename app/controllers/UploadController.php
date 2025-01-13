@@ -7,9 +7,7 @@ require_once __DIR__ . '/../config/config.php';
 
 class UploadController
 {
-    /*
-     * Обрабатывает загрузку файла и создает отчет об ошибках.
-     */
+    // Обрабатывает загрузку файла и создает отчет об ошибках.
     public function uploadFile()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
@@ -30,17 +28,9 @@ class UploadController
                 $reportGenerator = new ReportGenerator();
                 $reportFile = $reportGenerator->generateErrorReport($errorReport);
 
-                if (count(array_filter($errorReport, fn($error) => !empty($error[2]))) > 0) {
-                    $reportSender = new ReportSender();
-                    error_log("Отправка отчета через sendErrorReport: $filePath");
-                    $reportSender->sendErrorReport($filePath, $fileName);
-                } else {
-                    echo json_encode([
-                        'status' => 'success',
-                        'message' => 'Файл успешно загружен и обработан.',
-                        'filePath' => $destinationPath,
-                    ]);
-                }
+                $reportSender = new ReportSender();
+                error_log("Отправка отчета через sendErrorReport: $filePath");
+                $reportSender->sendErrorReport($filePath, $fileName);
             } else {
                 echo json_encode([
                     'status' => 'error',
