@@ -1,4 +1,4 @@
-![Демонстрация работы приложения](assets/your-gif.gif)
+![Демонстрация работы приложения](assets/demo.gif)
 
 # csv-data-importer
 
