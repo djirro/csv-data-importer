@@ -19,7 +19,31 @@
 
 3. Если все прошло успешно, база данных будет настроена и доступна для работы.
 
-### Компиляция и запуск проекта
+## Установка pdo_mysql в docker контейнер.
+1. Запуск контейнера в интерактивном режиме:
+    ```bash
+    docker exec -it csv-data-importer-php-1 bash
+    ```
+2. Внутри контейнера выполните следующие команды для установки необходимых пакетов и расширений:
+    ```bash
+    apt-get update && apt-get install -y libmysqlclient-dev
+    docker-php-ext-install pdo_mysql
+    ```
+3. Выйдите из контейнера:
+    ```bash
+    exit
+    ```
+4. Перезапустите контейнер:
+    ```bash
+    docker restart csv-data-importer-php-1
+    ```
+
+5. После перезапуска контейнера снова проверьте, появился ли драйвер pdo_mysql:
+    ```bash
+    docker exec -it csv-data-importer-php-1 php -m | grep pdo_mysql
+    ```
+
+## Компиляция и запуск проекта
 1. Для запуска проекта в режиме разработки используйте команду:
     ```bash
     npm run serve
