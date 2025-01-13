@@ -6,20 +6,10 @@ class CatalogModel
 {
     private $db;
 
-    /**
-     * Конструктор, инициализирует соединение с базой данных.
-     */
+    // Конструктор, инициализирует соединение с базой данных.
     public function __construct()
     {
         $this->db = (new Database())->getConnection();
-    }
-
-    /**
-     * Возвращает объект подключения к базе данных.
-     */
-    public function getDb()
-    {
-        return $this->db;
     }
 
     /**
