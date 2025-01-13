@@ -1,4 +1,5 @@
 <template>
+  <!-- Основная зона для перетаскивания и выбора файла. -->
   <div
     class="drop-zone"
     :class="{ dragging: isDragging }"
@@ -6,13 +7,17 @@
     @dragleave="onDragLeave"
     @drop.prevent="onDrop"
   >
+    <!-- Спиннер отображается во время загрузки файла. -->
     <div v-if="isLoading" class="spinner-container">
       <span class="spinner">⏳</span> Загрузка данных...
     </div>
 
+    <!-- Основной контент, если файл не загружается. -->
     <div v-else>
+      <!-- Сообщение об ошибке -->
       <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
       <p>Перетащите файл сюда или выберите его</p>
+      <!-- Скрытый input для выбора файла. -->
       <input
         type="file"
         accept=".csv"
@@ -20,6 +25,7 @@
         hidden
         ref="fileInput"
       />
+      <!-- Кнопка для вызова выбора файла. -->
       <button @click="triggerFileSelect">Выбрать файл</button>
     </div>
   </div>
@@ -36,29 +42,35 @@ export default {
     };
   },
   methods: {
+    // Устанавливает состояние перетаскивания в true.
     onDragOver(event) {
       this.isDragging = true;
     },
 
+    // Сбрасывает состояние перетаскивания.
     onDragLeave() {
       this.isDragging = false;
     },
 
+    // Обрабатывает перетаскивание файла.
     onDrop(event) {
       this.isDragging = false;
       const file = event.dataTransfer.files[0];
       this.validateFile(file);
     },
 
+    // Обрабатывает выбор файла через input.
     onFileSelect(event) {
       const file = event.target.files[0];
       this.validateFile(file);
     },
 
+    // Открывает диалоговое окно для выбора файла.
     triggerFileSelect() {
       this.$refs.fileInput.click();
     },
 
+    // Проверяет файл на корректность (наличие и формат).
     validateFile(file) {
       if (!file) {
         this.showErrorMessage("Файл не выбран.");
@@ -73,6 +85,7 @@ export default {
       this.uploadFile(file);
     },
 
+    // Загружает файл на сервер и обрабатывает ответ.
     async uploadFile(file) {
       const formData = new FormData();
       formData.append("file", file);
@@ -85,15 +98,14 @@ export default {
           body: formData,
         });
 
-        const result = await response.text();
-        console.log(result);
-
-        this.isLoading = false;
-
         if (response.ok) {
-          this.$emit("upload-success", result);
+          await this.downloadFile(response);
+          this.isLoading = false;
+          this.$emit("upload-success", "Файл успешно загружен!");
           alert("Файл успешно загружен!");
         } else {
+          const result = await response.text();
+          this.isLoading = false;
           this.$emit("upload-error", result);
           this.errorMessage = `Ошибка: ${result}`;
         }
@@ -104,6 +116,35 @@ export default {
       }
     },
 
+    // Скачивает отчет об ошибках, если файл содержит некорректные данные.
+    async downloadFile(response) {
+      const contentDisposition = response.headers.get("Content-Disposition");
+      console.log("Content-Disposition header:", contentDisposition);
+
+      let fileName = "error_report.csv";
+
+      if (contentDisposition) {
+        const matches = contentDisposition.match(
+          /filename\*?=\s*["']?([^"';\n]+)/
+        );
+        console.log("Matches:", matches);
+
+        if (matches && matches[1]) {
+          fileName = matches[1];
+        }
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = fileName;
+      a.click();
+
+      window.URL.revokeObjectURL(downloadUrl);
+    },
+
+    // Отображает сообщение об ошибке на 5 секунд.
     showErrorMessage(message) {
       this.errorMessage = message;
 
@@ -116,6 +157,7 @@ export default {
 </script>
 
 <style scoped>
+/* Стили для зоны перетаскивания. */
 .drop-zone {
   width: 100%;
   height: 600px;
@@ -129,11 +171,13 @@ export default {
   cursor: pointer;
 }
 
+/* Состояние перетаскивания. */
 .drop-zone.dragging {
   background-color: #f0f8ff;
   border-color: #42b983;
 }
 
+/* Кнопка для выбора файла. */
 button {
   margin-top: 10px;
   padding: 8px 16px;
@@ -148,12 +192,14 @@ button:hover {
   background-color: #369971;
 }
 
+/* Сообщение об ошибке. */
 .error {
   color: red;
   font-size: 14px;
   margin-bottom: 10px;
 }
 
+/* Спиннер. */
 .spinner-container {
   display: flex;
   flex-direction: column;

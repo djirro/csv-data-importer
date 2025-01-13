@@ -1,4 +1,5 @@
 <template>
+  <!-- Основной компонент приложения, рендерит DragAndDrop. -->
   <DragAndDrop />
 </template>
 
@@ -14,6 +15,7 @@ export default {
 </script>
 
 <style>
+/* Стили для основного контейнера приложения. */
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
